@@ -1,0 +1,85 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Professional Color Palette (Slate & Blue) */
+    --primary-color: #2563EB;
+    /* Royal Blue */
+    --primary-hover: #1D4ED8;
+    /* Darker Blue */
+    --secondary-color: #475569;
+    /* Slate 600 */
+
+    --bg-color: #F8FAFC;
+    /* Slate 50 - Very light cool grey */
+    --surface-color: #FFFFFF;
+    /* White */
+
+    --text-primary: #0F172A;
+    /* Slate 900 - Almost black */
+    --text-secondary: #64748B;
+    /* Slate 500 */
+    --text-tertiary: #94A3B8;
+    /* Slate 400 */
+
+    --border-color: #E2E8F0;
+    /* Slate 200 */
+    --divider-color: #F1F5F9;
+    /* Slate 100 */
+
+    /* Semantic Colors */
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --danger-color: #EF4444;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 9999px;
+
+    /* Font */
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
