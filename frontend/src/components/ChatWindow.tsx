@@ -1,18 +1,30 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MessageBubble from './MessageBubble';
 import Loader from './Loader';
 import SuggestionChips from './SuggestionChips';
-import './ChatWindow.css';
+
+interface Message {
+    type: 'user' | 'bot';
+    content: string;
+    isError?: boolean;
+    courses?: any[];
+    matchType?: string;
+}
+
+interface ChatWindowProps {
+    username: string;
+    onLogout: () => void;
+}
 
 const API_URL = '/api/search';
 
-function ChatWindow({ username, onLogout }) {
-    const [messages, setMessages] = useState([]);
+function ChatWindow({ username, onLogout }: ChatWindowProps) {
+    const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const messagesEndRef = useRef(null);
-    const inputRef = useRef(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Scroll to bottom when new messages arrive
     useEffect(() => {
@@ -31,7 +43,7 @@ function ChatWindow({ username, onLogout }) {
             await new Promise(r => setTimeout(r, 1000)); // Typing for 1s
             if (isCancelled) return;
 
-            const welcomeMessage1 = {
+            const welcomeMessage1: Message = {
                 type: 'bot',
                 content: `Hello! I'm Course Buddy. I can help you find certification courses and learning paths tailored to your career goals.`
             };
@@ -45,7 +57,7 @@ function ChatWindow({ username, onLogout }) {
             await new Promise(r => setTimeout(r, 1200)); // Typing for 1.2s
             if (isCancelled) return;
 
-            const welcomeMessage2 = {
+            const welcomeMessage2: Message = {
                 type: 'bot',
                 content: `Search for courses by skill, department, or job role.`
             };
@@ -79,7 +91,7 @@ function ChatWindow({ username, onLogout }) {
         }
 
         // Add user message
-        const userMessage = { type: 'user', content: query };
+        const userMessage: Message = { type: 'user', content: query };
         setMessages(prev => [...prev, userMessage]);
         setInputValue('');
         setShowSuggestions(false); // Hide suggestions after first message
@@ -98,7 +110,6 @@ function ChatWindow({ username, onLogout }) {
             const data = await response.json();
 
             // Calculate "Reading/Typing" time based on response length
-            // Reading user query time + Thinking time + Typing response time
             let contentText = data.message || data.ai_message || (data.courses ? "Found courses" : "");
             const letters = contentText.length;
             const typingDelay = Math.min(1000 + (letters * 20), 4000); // Min 1s, Max 4s
@@ -109,8 +120,7 @@ function ChatWindow({ username, onLogout }) {
             await new Promise(r => setTimeout(r, remainingDelay));
 
             if (data.status === 'success') {
-                // Course search results
-                const botMessage = {
+                const botMessage: Message = {
                     type: 'bot',
                     content: data.ai_message || `🎯 Here are the best matches for you (${data.total_results} results):`,
                     courses: data.courses,
@@ -118,22 +128,19 @@ function ChatWindow({ username, onLogout }) {
                 };
                 setMessages(prev => [...prev, botMessage]);
             } else if (data.status === 'chat') {
-                // Intelligent chat response (no courses)
-                const chatMessage = {
+                const chatMessage: Message = {
                     type: 'bot',
                     content: data.message
                 };
                 setMessages(prev => [...prev, chatMessage]);
             } else if (data.status === 'rejected') {
-                // Query was filtered out by AI
-                const rejectedMessage = {
+                const rejectedMessage: Message = {
                     type: 'bot',
                     content: data.message || 'I focus on course recommendations. Ask me about Python, AI, or Web Dev! 🎓'
                 };
                 setMessages(prev => [...prev, rejectedMessage]);
             } else {
-                // not_found - no matching courses
-                const notFoundMessage = {
+                const notFoundMessage: Message = {
                     type: 'bot',
                     content: data.message || 'Sorry, I couldn\'t find any courses matching that. Try checking your spelling or ask for a broader topic.'
                 };
@@ -141,9 +148,8 @@ function ChatWindow({ username, onLogout }) {
             }
         } catch (error) {
             console.error('API Error:', error);
-            // Even errors should feel natural
             await new Promise(r => setTimeout(r, 1000));
-            const errorMessage = {
+            const errorMessage: Message = {
                 type: 'bot',
                 content: 'Formatting response... (Server busy, please retry) 🔄',
                 isError: true
@@ -154,7 +160,7 @@ function ChatWindow({ username, onLogout }) {
         }
     };
 
-    const handleKeyPress = (e) => {
+    const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
@@ -170,86 +176,97 @@ function ChatWindow({ username, onLogout }) {
         }
     };
 
-    // Handle suggestion chip click
-    const handleSuggestionClick = (suggestion) => {
+    const handleSuggestionClick = (suggestion: string) => {
         setInputValue(suggestion);
-        // Optionally auto-send
         setTimeout(() => {
-            const event = { target: { value: suggestion } };
             setInputValue(suggestion);
         }, 100);
     };
 
     return (
-        <div className="chat-container">
+        <div className="flex flex-col w-full h-full bg-slate-50 relative overflow-hidden font-inter">
             {/* Header */}
-            <div className="chat-header">
-                <div className="header-left">
-                    <img src="/bot_avatar.png" alt="CB" className="header-icon-img" />
-                    <div className="header-info">
-                        <h1>Course Buddy</h1>
-                        <span className="status-online">● Online</span>
+            <header className="flex-none px-4 py-3 md:px-6 md:py-4 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-between z-10">
+                <div className="flex items-center gap-3">
+                    <img src="/bot_avatar.png" alt="CB" className="w-10 h-10 rounded-xl object-cover shadow-md shadow-blue-600/10" />
+                    <div className="flex flex-col">
+                        <h1 className="text-base font-semibold text-slate-800 leading-tight">Course Buddy</h1>
+                        <span className="text-[10px] md:text-xs text-emerald-600 font-medium flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                            Online
+                        </span>
                     </div>
                 </div>
-                <div className="header-right">
-                    <div className="user-profile">
-                        <span className="user-name">{username}</span>
-                        <img src="/user_avatar.png" alt="User" className="header-user-img" />
+                <div className="flex items-center gap-4">
+                    <div className="hidden md:flex items-center gap-2 mr-2">
+                        <span className="text-sm font-medium text-slate-600">{username}</span>
+                        <img src="/user_avatar.png" alt="User" className="w-8 h-8 rounded-full bg-slate-200 object-cover border border-slate-100" />
                     </div>
-                    <button onClick={onLogout} className="logout-btn">Logout</button>
+                    <button
+                        onClick={onLogout}
+                        className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 hover:text-slate-800 transition-all duration-200"
+                    >
+                        Logout
+                    </button>
                 </div>
-            </div>
+            </header>
 
             {/* Messages */}
-            <div className="messages-container">
+            <main className="flex-1 px-4 py-6 md:px-[10%] overflow-y-auto flex flex-col gap-6 scroll-smooth">
                 {messages.map((msg, index) => (
                     <MessageBubble key={index} message={msg} />
                 ))}
                 {isLoading && <Loader />}
 
-                {/* Suggestion Chips */}
                 <SuggestionChips
                     visible={showSuggestions && messages.length <= 2}
                     onSelectSuggestion={handleSuggestionClick}
                 />
 
                 <div ref={messagesEndRef} />
-            </div>
+            </main>
 
             {/* Input */}
-            <div className="input-container">
-                <div className="input-wrapper">
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        placeholder="Ask about courses, skills, or career paths..."
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        disabled={isLoading}
-                    />
-                    <button
-                        onClick={sendMessage}
-                        disabled={isLoading}
-                        className="send-btn"
-                    >
-                        {isLoading ? (
-                            <div className="custom-loader"></div>
-                        ) : (
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        )}
-                    </button>
-                </div>
-                <div className="input-hints">
-
+            <footer className="flex-none p-4 md:p-6 bg-white border-t border-slate-200">
+                <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-3xl px-5 py-2 focus-within:bg-white focus-within:border-blue-600 focus-within:ring-4 focus-within:ring-blue-600/5 transition-all duration-300">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Ask about courses, skills, or career paths..."
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            disabled={isLoading}
+                            className="flex-1 bg-transparent border-none outline-none py-2 text-slate-800 placeholder:text-slate-400 text-sm md:text-base"
+                        />
+                        <button
+                            onClick={sendMessage}
+                            disabled={isLoading || !inputValue.trim()}
+                            className={`w-10 h-10 flex items-center justify-center rounded-full flex-shrink-0 transition-all duration-300 ${isLoading || !inputValue.trim()
+                                ? 'bg-slate-200 text-slate-400'
+                                : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 shadow-md shadow-blue-600/20'
+                                }`}
+                        >
+                            {isLoading ? (
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            ) : (
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                     {messages.some(m => m.isError) && (
-                        <button onClick={handleRetry} className="retry-btn">🔄 Retry</button>
+                        <div className="mt-3 text-center">
+                            <button onClick={handleRetry} className="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1 mx-auto">
+                                🔄 Retry last query
+                            </button>
+                        </div>
                     )}
                 </div>
-            </div>
+            </footer>
         </div>
     );
 }
