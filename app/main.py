@@ -27,11 +27,12 @@ class SearchRequest(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    """Load course data and embeddings on startup."""
+    """Load course data on startup. Embeddings will be lazy-loaded on first request."""
+    print("Startup: Loading course data...")
     df = load_course_data()
     print(f"Loaded {len(df)} courses")
-    preload_embeddings()
-    print("API ready!")
+    # preload_embeddings()  # Disabled for Vercel to avoid timeout
+    print("API is ready and waiting for requests!")
 
 
 @app.get("/")
