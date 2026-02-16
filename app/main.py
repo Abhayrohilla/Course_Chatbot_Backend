@@ -35,9 +35,9 @@ async def startup_event():
     print("API is ready and waiting for requests!")
 
 
-@app.get("/")
-async def root():
-    """Health check endpoint."""
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint moved to /api/health."""
     return {"status": "ok", "message": "Course Recommendation API is running"}
 
 
