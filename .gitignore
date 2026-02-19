@@ -41,9 +41,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Build outputs
-frontend/dist/
-frontend/build/
+# Frontend (separate repo)
+frontend/
 
 # Environment variables
 .env
